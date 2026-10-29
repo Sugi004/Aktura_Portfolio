@@ -4,3 +4,5 @@
 - `executive-travel.webp` is a locally optimized Pexels stock image used in the travel coordination section. Photo by Jenna Hamra: https://www.pexels.com/photo/aircraft-wing-804436/
 
 Replace the travel image with an approved owner portrait or brand photograph when one is available.
+
+- `services/*.webp` are 960 × 640 illustrative Unsplash crops used beside designed service workflow examples. See [the complete source list](../../docs/service-image-sources.md).

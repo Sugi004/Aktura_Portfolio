@@ -11,6 +11,7 @@ import { getPublicContent } from '@/lib/public-content';
 import BrandWordmark from '@/components/BrandWordmark';
 import ContactDetails from '@/components/ContactDetails';
 import PrimaryNav from '@/components/PrimaryNav';
+import ServiceVisualPair from '@/components/ServiceVisualPair';
 
 
 export default async function Home() {
@@ -57,13 +58,22 @@ export default async function Home() {
     <ScrollJourney />
 
     <section className="feature-travel" id="travel" data-scene="travel" data-editorial-reveal data-parallax-section="travel">
-      <div className="travel-visual" data-editorial-image><Image className="travel-photo" src="/images/executive-travel.webp" alt="View of an aircraft wing above the clouds at sunset" loading="lazy" width={1600} height={1000}/><div className="travel-orbit orbit-one"/><div className="travel-orbit orbit-two"/><div className="travel-visual-content"><div className="route-tag"><span className="live-dot"/> YOUR TRAVEL DESK</div><div className="route-map"><span className="map-arc"/><span className="map-point point-a"/><span className="map-point point-b"/><span className="plane-glyph"><Plane size={24}/></span><span className="map-city city-a">NEW YORK</span><span className="map-city city-b">LONDON</span></div><div className="trip-card"><div><span className="trip-label">TRIP OVERVIEW</span><strong>One clear itinerary</strong></div><span className="trip-icon"><CalendarDays size={18}/></span><div className="trip-lines"><i/><i/><i/></div></div></div><div className="visual-caption">Research · coordination · confirmation</div></div>
+      <div className="travel-visual" data-editorial-image>
+        <Image className="travel-photo" src="/images/executive-travel.webp" alt="View of an aircraft wing above the clouds at sunset" loading="lazy" width={1600} height={1000}/>
+        <div className="travel-orbit orbit-one" aria-hidden="true"/><div className="travel-orbit orbit-two" aria-hidden="true"/>
+        <div className="travel-visual-content" aria-hidden="true">
+          <div className="route-tag"><span className="live-dot"/> YOUR TRAVEL DESK</div>
+          <div className="route-map"><span className="map-arc"/><span className="map-point point-a"/><span className="map-point point-b"/><span className="plane-glyph"><Plane size={24}/></span><span className="map-city city-a">NEW YORK</span><span className="map-city city-b">LONDON</span></div>
+          <div className="trip-card"><div><span className="trip-label">TRIP OVERVIEW</span><strong>One clear itinerary</strong></div><span className="trip-icon"><CalendarDays size={18}/></span><div className="trip-lines"><i/><i/><i/></div></div>
+        </div>
+        <div className="visual-caption">Research · coordination · confirmation</div>
+      </div>
       <div className="travel-copy"><p className="kicker"><span className="kicker-line"/> Travel, thoughtfully coordinated</p><h2>From takeoff<br/>to <em>the details<br/>in between.</em></h2><p>Compare routes, stays and ground transport with your preferences in mind. I’ll bring the options together, coordinate approved arrangements and keep the itinerary clear.</p><ul className="check-list"><li><Check/> Flight and accommodation research</li><li><Check/> Transfer and reservation coordination</li><li><Check/> Itinerary, reminders and changes</li></ul><p className="fine-print">Prices and availability are set by providers. Reservations are final only after provider confirmation.</p><a className="button button-outline" href="/travel">Visit the travel desk <ArrowUpRight size={16}/></a></div>
     </section>
 
     <section className="services-section section-shell" id="services" data-scene="services" data-editorial-reveal data-parallax-section="services">
       <div className="section-heading"><div><p className="kicker">The service menu</p><h2>Support that meets<br/><em>the real shape of your day.</em></h2></div><p>Start with the part that needs attention. The exact scope is tailored together before we begin.</p></div>
-      <div className="service-groups">{groups.map((group, gi)=><div className="service-group" key={group}><div className="group-head"><span className="section-number">0{gi+1}</span><h3>{group}</h3><span className="group-count">{String(services.filter(s=>s.group===group).length).padStart(2,'0')} services</span></div><div className="service-list">{services.filter(s=>s.group===group).map((service,i)=><details className="service-item" id={`service-${service.id}`} key={service.id}><summary><span className="service-title">{service.title}</span><span className="service-open">+</span></summary><div className="service-detail"><p>{service.summary}</p><div className="detail-grid"><div><h4>What I coordinate</h4><ul>{service.delivers.map(d=><li key={d}>{d}</li>)}</ul></div><div className="benefit-note"><h4>Why it helps</h4><p>{service.benefit}</p><a className="text-link" href={`/?service=${service.id}#contact`}>Request this service <ArrowUpRight size={14}/></a></div></div></div></details>)}</div></div>)}</div>
+      <div className="service-groups">{groups.map((group, gi)=><div className="service-group" key={group}><div className="group-head"><span className="section-number">0{gi+1}</span><h3>{group}</h3><span className="group-count">{String(services.filter(s=>s.group===group).length).padStart(2,'0')} services</span></div><div className="service-list">{services.filter(s=>s.group===group).map((service,i)=><details className="service-item" id={`service-${service.id}`} key={service.id}><summary><span className="service-title">{service.title}</span><span className="service-open">+</span></summary><div className="service-detail"><p>{service.summary}</p><ServiceVisualPair serviceId={service.id}/><div className="detail-grid"><div><h4>What I coordinate</h4><ul>{service.delivers.map(d=><li key={d}>{d}</li>)}</ul></div><div className="benefit-note"><h4>Why it helps</h4><p>{service.benefit}</p><a className="text-link" href={`/?service=${service.id}#contact`}>Request this service <ArrowUpRight size={14}/></a></div></div></div></details>)}</div></div>)}</div>
     </section>
 
     <section className="process-section" id="how" data-scene="process" data-editorial-reveal data-parallax-section="process"><div className="section-shell process-inner"><div className="process-intro"><p className="kicker">A clear way to begin</p><h2>Well considered.<br/><em>Then underway.</em></h2><p>Every request starts with a conversation and a shared understanding of what good looks like.</p></div><div className="process-steps">{[['01','Submit a request','Choose a service and describe what you need, when you need it and the preferences that matter.'],['02','Clarify requirements','We confirm requirements, budget, deadline and expectations.'],['03','Review the proposal','You receive the agreed scope, price, deliverables and relevant terms for approval.'],['04','Authorize the work','Work begins after your approval, onboarding and agreed payment conditions.'],['05','Updates and delivery','You receive updates, confirmations and completed deliverables according to our agreement.']].map(([n,t,d])=><div className="process-step" key={n}><span className="step-number">{n}</span><div><h3>{t}</h3><p>{d}</p></div><ArrowUpRight size={16}/></div>)}</div></div></section>
@@ -76,7 +86,14 @@ export default async function Home() {
 
     <section className="contact-section" id="contact" data-scene="contact" data-editorial-reveal data-parallax-section="contact"><div className="section-shell contact-inner"><div className="contact-copy"><p className="kicker"><span className="kicker-line"/> Begin with a conversation</p><h2>What would you like<br/>to <em>make easier?</em></h2><p>Share the outcome you’re looking for. I’ll follow up to clarify timing, scope and next steps.</p><ContactDetails/><div className="contact-footnote"><ShieldCheck size={18}/><span>Please don’t include card details, passport numbers or sensitive documents here. A secure channel can be agreed if needed.</span></div></div><ContactForm services={services}/></div></section>
 
-    <footer className="site-footer" data-scene="footer" data-parallax-section="footer"><BrandWordmark href="#home" className="footer-mark"/><p>Remote executive assistance and travel coordination.</p><div className="footer-links"><a href="/about">About</a><a href="/services">Services</a><a href="/travel">Travel desk</a><a href="/portfolio">Work</a><a href="/packages">Packages</a><a href="/how-it-works">Process</a><a href="/faq">FAQs</a><a href="/contact">Contact</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a></div><span className="copyright">© {new Date().getFullYear()} · Altura Executive</span></footer>
+    <footer className="site-footer" data-scene="footer" data-parallax-section="footer">
+      <BrandWordmark href="#home" className="footer-mark" />
+      <p>Remote executive assistance and travel coordination.</p>
+      <nav className="footer-links" aria-label="Footer">
+        <a href="/about">About</a><a href="/services">Services</a><a href="/travel">Travel desk</a><a href="/portfolio">Work</a><a href="/packages">Packages</a><a href="/how-it-works">Process</a><a href="/faq">FAQs</a><a href="/contact">Contact</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a>
+      </nav>
+      <span className="copyright">© {new Date().getFullYear()} · Altura Executive</span>
+    </footer>
     </div>
   </main>;
 }

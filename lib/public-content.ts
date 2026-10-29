@@ -46,6 +46,7 @@ function groupName(category: string): string {
     travel: "Travel desk",
     "business-operations": "Business operations",
     "digital-workflows": "Digital support",
+    "health-wellness": "Health & wellness coordination",
     other: "Other support",
   } as Record<string, string>)[category] ?? "Other support";
 }

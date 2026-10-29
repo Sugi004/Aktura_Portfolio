@@ -5,7 +5,7 @@ import { saveContent } from "./actions";
 export const dynamic = "force-dynamic";
 
 const datasets = [
-  ["services", "Services", "Use category values: executive-support, travel, business-operations, digital-workflows, other."],
+  ["services", "Services", "Use category values: executive-support, travel, business-operations, digital-workflows, health-wellness, other."],
   ["packages", "Packages", "Set is_draft=false only when the price and scope are approved for public display."],
   ["faqs", "FAQs", "Questions and answers shown on the public site."],
   ["demonstration_projects", "Demonstration projects", "Keep is_demonstration=true so sample work is never presented as a client engagement."],

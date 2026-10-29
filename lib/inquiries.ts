@@ -5,9 +5,10 @@ const categories: ServiceCategory[] = [
   "travel",
   "business-operations",
   "digital-workflows",
+  "health-wellness",
   "other",
 ];
-const validServiceSlugs = ["executive", "flights", "accommodation", "travel", "ground", "personal", "reservations", "visa", "lead-gen", "customer-support", "operations", "marketing", "automation", "research", "expenses"];
+const validServiceSlugs = ["executive", "flights", "accommodation", "travel", "ground", "personal", "reservations", "visa", "lead-gen", "customer-support", "operations", "marketing", "automation", "research", "expenses", "health-wellness"];
 
 export function validateInquiry(value: unknown): { data?: CreateInquiryInput; error?: string } {
   if (!value || typeof value !== "object" || Array.isArray(value)) return { error: "Enter your request details." };

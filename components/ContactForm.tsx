@@ -83,7 +83,7 @@ export default function ContactForm({ services, defaultService = '' }: Props) {
       if (text('preference')) travelDetails.preference = text('preference');
     }
     if (text('requirements')) travelDetails.requirements = text('requirements');
-    const category = service?.group === 'Executive support' ? 'executive-support' : service?.group === 'Travel desk' ? 'travel' : service?.group === 'Business operations' ? 'business-operations' : service?.group === 'Digital support' ? 'digital-workflows' : 'other';
+    const category = service?.group === 'Executive support' ? 'executive-support' : service?.group === 'Travel desk' ? 'travel' : service?.group === 'Business operations' ? 'business-operations' : service?.group === 'Digital support' ? 'digital-workflows' : service?.group === 'Health & wellness coordination' ? 'health-wellness' : 'other';
     const payload: Record<string, unknown> = {
       name: fields.name,
       email: fields.email,

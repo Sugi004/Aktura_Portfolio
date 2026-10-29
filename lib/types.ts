@@ -3,6 +3,7 @@ export type ServiceCategory =
   | "travel"
   | "business-operations"
   | "digital-workflows"
+  | "health-wellness"
   | "other";
 
 export type InquiryStatus =

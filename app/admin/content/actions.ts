@@ -26,7 +26,7 @@ export async function saveContent(formData: FormData) {
     if (!row || typeof row !== "object" || Array.isArray(row)) redirect(`/admin/content?error=shape&table=${table}`);
     const item = row as Record<string, unknown>;
     if (required.some((key) => !(key in item))) redirect(`/admin/content?error=fields&table=${table}`);
-    if (table === "services" && !["executive-support", "travel", "business-operations", "digital-workflows", "other"].includes(String(item.category))) redirect(`/admin/content?error=category&table=${table}`);
+    if (table === "services" && !["executive-support", "travel", "business-operations", "digital-workflows", "health-wellness", "other"].includes(String(item.category))) redirect(`/admin/content?error=category&table=${table}`);
     if (["services", "packages", "faqs", "demonstration_projects"].some((key) => key === table) && typeof item.active !== "boolean" && table !== "packages") redirect(`/admin/content?error=active&table=${table}`);
     if (table === "packages" && (typeof item.active !== "boolean" || typeof item.is_draft !== "boolean" || !Number.isInteger(item.starting_price_cents) || Number(item.starting_price_cents) < 0)) redirect(`/admin/content?error=package&table=${table}`);
     if (table === "demonstration_projects" && item.is_demonstration !== true) redirect(`/admin/content?error=demonstration&table=${table}`);
