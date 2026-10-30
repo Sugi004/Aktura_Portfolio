@@ -1,4 +1,4 @@
 export function createContactMailto(to: string, subject: string, body: string): string {
-  const params = new URLSearchParams({ subject, body });
-  return `mailto:${to}?${params.toString()}`;
+  // Encode spaces as %20 rather than + for mail clients that treat plus signs literally.
+  return `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }

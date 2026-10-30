@@ -48,7 +48,7 @@ export default function ContactForm({ services, defaultService = '' }: Props) {
         return `${displayLabel(key)}: ${String(value).trim()}`;
       });
     const subject = `Altura Executive inquiry — ${serviceTitle}`;
-    const body = `Hello Altura Executive,\n\nI would like to discuss support with the following details:\n\n${lines.join('\n')}\n\nPlease let me know the next steps.\n`;
+    const body = `Hello Altura Executive,\n\nI would like to discuss support with the following details:\n\n${lines.join('\n\n')}\n\nPlease let me know the next steps.\n`;
     setMailtoHref(createContactMailto('alturaexecutive@gmail.com', subject, body));
   }
 

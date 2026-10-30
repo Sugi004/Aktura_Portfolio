@@ -171,11 +171,17 @@ test('contact form prepares an encoded mailto draft and sends no API request', a
   await expect(emailLink).toBeVisible();
   const href = await emailLink.getAttribute('href');
   expect(href).toMatch(/^mailto:alturaexecutive@gmail\.com\?/);
+  expect(href).not.toContain('+');
   const draft = new URL(href!);
   expect(draft.searchParams.get('subject')).toContain('Virtual executive assistance');
   expect(draft.searchParams.get('body')).toContain('Name: Taylor Example');
   expect(draft.searchParams.get('body')).toContain('Email: taylor@example.com');
   expect(draft.searchParams.get('body')).toContain('Please help organize my calendar and inbox.');
+  const emailButtonColors = await emailLink.evaluate((element) => {
+    const styles = getComputedStyle(element);
+    return { background: styles.backgroundColor, color: styles.color };
+  });
+  expect(emailButtonColors).toEqual({ background: 'rgb(201, 164, 92)', color: 'rgb(7, 21, 46)' });
   expect(apiRequests).toEqual([]);
   expect(pageErrors).toEqual([]);
 });
@@ -184,4 +190,122 @@ test('database-backed admin and submission endpoints are absent', async ({ page 
   expect((await page.goto('/admin'))?.status()).toBe(404);
   expect((await page.goto('/api/inquiries'))?.status()).toBe(404);
   expect((await page.goto('/api/reviews'))?.status()).toBe(404);
+});
+
+test('desktop and mobile navigation links reach the expected pages', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto('/');
+  const desktopNav = page.getByRole('navigation', { name: 'Main navigation' });
+  await expect(desktopNav.getByRole('link', { name: 'Services' })).toHaveAttribute('href', '/services');
+  await expect(desktopNav.getByRole('link', { name: 'Packages' })).toHaveAttribute('href', '/packages');
+  await desktopNav.getByRole('link', { name: 'Travel desk' }).click();
+  await expect(page).toHaveURL('/travel');
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+  const mobileNav = page.locator('.mobile-nav');
+  await mobileNav.locator('summary').click();
+  await expect(mobileNav).toHaveAttribute('open', '');
+  await mobileNav.getByRole('link', { name: 'Packages' }).click();
+  await expect(page).toHaveURL('/packages');
+});
+
+test('theme toggle changes theme and persists the user choice', async ({ page }) => {
+  await page.goto('/');
+  const toggle = page.getByRole('button', { name: 'Switch to dark mode' });
+  await toggle.click();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  await expect(page.getByRole('button', { name: 'Switch to light mode' })).toBeVisible();
+  expect(await page.evaluate(() => localStorage.getItem('executive-portfolio-theme'))).toBe('dark');
+  await page.getByRole('button', { name: 'Switch to light mode' }).click();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+  expect(await page.evaluate(() => localStorage.getItem('executive-portfolio-theme'))).toBe('light');
+});
+
+test('all service page pairs render with loaded images, captions, and correct inquiry links', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  const errors: string[] = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  await page.goto('/services');
+  const serviceCards = page.locator('.service-catalog .content-info-card');
+  await expect(serviceCards).toHaveCount(16);
+  for (let index = 0; index < await serviceCards.count(); index++) {
+    const card = serviceCards.nth(index);
+    const pair = card.locator('.service-visual-pair');
+    await expect(pair).toBeVisible();
+    await expect(pair.locator('.service-visual')).toHaveCount(2);
+    await expect(pair.locator('.service-visual-index').nth(0)).toContainText('Before');
+    await expect(pair.locator('.service-visual-index').nth(1)).toContainText('After');
+    await expect(pair.locator('.service-visual-disclaimer')).toContainText('not client work');
+    await pair.scrollIntoViewIfNeeded();
+    const imageStates = await pair.locator('img').evaluateAll((images) => images.map((image) => ({ complete: (image as HTMLImageElement).complete, width: (image as HTMLImageElement).naturalWidth })));
+    expect(imageStates).toHaveLength(2);
+    expect(imageStates.every((image) => image.complete && image.width > 0), `Service card ${index + 1} has a missing visual: ${JSON.stringify(imageStates)}`).toBe(true);
+    const requestLink = card.getByRole('link', { name: /Request this service/ });
+    const href = await requestLink.getAttribute('href');
+    expect(href).toMatch(/^\/contact\?service=.+/);
+  }
+  expect(errors).toEqual([]);
+});
+
+test('home service accordions, FAQ accordions, and route selector respond', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  const pageErrors: string[] = [];
+  page.on('pageerror', (error) => pageErrors.push(error.message));
+  await page.goto('/');
+
+  const service = page.locator('.service-item').first();
+  await service.locator('summary').click();
+  await expect(service).toHaveAttribute('open', '');
+  await expect(service.locator('.service-visual-pair')).toBeVisible();
+  await expect(service.getByRole('link', { name: /Request this service/ })).toHaveAttribute('href', /service=executive/);
+
+  const faq = page.locator('.faq-item').first();
+  await faq.locator('summary').click();
+  await expect(faq).toHaveAttribute('open', '');
+  await expect(faq.locator('p')).toBeVisible();
+
+  const routePicker = page.getByRole('group', { name: 'Choose a route destination' });
+  const dubai = routePicker.getByRole('button', { name: /set route destination to Dubai/ });
+  await dubai.click();
+  await expect(dubai).toHaveAttribute('aria-pressed', 'true');
+  await expect(routePicker.getByRole('button', { name: /set route destination to London/ })).toHaveAttribute('aria-pressed', 'false');
+
+  const journey = page.locator('#journey');
+  await journey.scrollIntoViewIfNeeded();
+  const destinationTabs = journey.getByRole('group', { name: 'Preview travel coordination by destination' });
+  await destinationTabs.getByRole('button', { name: 'Singapore' }).click();
+  await expect(destinationTabs.getByRole('button', { name: 'Singapore' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(journey.locator('.journey-destination-panel')).toContainText('cross-time-zone meeting coordination');
+  expect(pageErrors).toEqual([]);
+});
+
+test('reviews previous and next controls wrap through the carousel', async ({ page }) => {
+  await page.goto('/reviews');
+  const card = page.locator('.review-card');
+  await expect(card).toContainText('Alexandra M.');
+  await page.getByRole('button', { name: 'Previous testimonial' }).click();
+  await expect(card).toContainText('James W.');
+  await expect(page.locator('.review-controls > span')).toHaveText('5 / 5');
+  await page.getByRole('button', { name: 'Next testimonial' }).click();
+  await expect(card).toContainText('Alexandra M.');
+  await expect(page.locator('.review-controls > span')).toHaveText('1 / 5');
+});
+
+test('travel form adapts fields and accepts complete trip coordination choices', async ({ page }) => {
+  await page.goto('/travel');
+  await expect(page.getByLabel('Departure city')).toBeVisible();
+  const journeyType = page.getByLabel('Journey type');
+  await journeyType.selectOption('one-way');
+  await expect(page.getByLabel('Return date')).toHaveCount(0);
+  await journeyType.selectOption('return');
+  await expect(page.getByLabel('Return date')).toBeVisible();
+
+  await page.getByLabel('What can I help with?').selectOption('travel');
+  await expect(page.getByLabel('Destinations')).toBeVisible();
+  await page.getByRole('checkbox', { name: 'Flight coordination', exact: true }).check();
+  const accommodation = page.getByRole('checkbox', { name: 'Accommodation', exact: true });
+  await accommodation.check();
+  await expect(page.getByRole('checkbox', { name: 'Flight coordination', exact: true })).toBeChecked();
+  await expect(accommodation).toBeChecked();
 });

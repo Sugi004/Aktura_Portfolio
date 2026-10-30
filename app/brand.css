@@ -755,6 +755,17 @@ body,
 .reviews-home .review-card blockquote .review-quote-lead { font-size: clamp(22px, 2vw, 26px); line-height: 1.2; }
 .reviews-home .review-attribution { margin-top: 14px; }
 .reviews-home .review-controls { margin-top: 14px; }
+.success-alert .button-outline {
+  flex: 0 0 auto;
+  border-color: var(--altura-gold);
+  background: var(--altura-gold);
+  color: var(--altura-navy);
+}
+.success-alert .button-outline:hover {
+  border-color: var(--altura-champagne);
+  background: var(--altura-champagne);
+  color: var(--altura-navy);
+}
 @keyframes review-slide-in { from { opacity: .35; transform: translateX(14px); } to { opacity: 1; transform: translateX(0); } }
 @media (prefers-reduced-motion: reduce) {
   .reviews-home .review-card { animation: none; }
