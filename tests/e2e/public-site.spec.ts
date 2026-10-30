@@ -107,6 +107,25 @@ test('review category and rating do not collide at narrow widths', async ({ page
   }
 });
 
+test('homepage reviews use a full-width page background and compact slide transition', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.goto('/');
+  const section = page.locator('.reviews-home');
+  const bounds = await section.boundingBox();
+  expect(bounds).not.toBeNull();
+  expect(bounds!.x).toBe(0);
+  expect(bounds!.width).toBe(1280);
+  const carousel = section.locator('.review-carousel');
+  const background = await carousel.evaluate((element) => getComputedStyle(element).backgroundColor);
+  expect(background).toBe('rgba(0, 0, 0, 0)');
+  const card = section.locator('.review-card');
+  expect((await card.boundingBox())!.width).toBeLessThanOrEqual(600);
+  await section.getByRole('button', { name: 'Next testimonial' }).click();
+  await expect(card).toContainText('Every detail was considered');
+  await expect.poll(() => card.evaluate((element) => getComputedStyle(element).animationName)).toBe('review-slide-in');
+});
+
 test('package cards use glass styling on the homepage and Packages page', async ({ page }) => {
   for (const route of ['/', '/packages']) {
     await page.goto(route);
