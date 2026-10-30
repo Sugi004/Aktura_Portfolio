@@ -12,7 +12,7 @@ import BrandWordmark from '@/components/BrandWordmark';
 import ContactDetails from '@/components/ContactDetails';
 import PrimaryNav from '@/components/PrimaryNav';
 import ServiceVisualPair from '@/components/ServiceVisualPair';
-
+import ReviewCarousel from '@/components/ReviewCarousel';
 
 export default async function Home() {
   const { demos, faqs, packages, services } = await getPublicContent();
@@ -82,6 +82,8 @@ export default async function Home() {
 
     <section className="packages-section" id="packages" data-scene="packages" data-editorial-reveal data-parallax-section="packages"><div className="section-shell"><div className="section-heading package-heading"><div><p className="kicker">Ongoing support</p><h2>Steady help,<br/><em>at a thoughtful pace.</em></h2></div><p>Starting points for monthly arrangements. The final scope, hours and response windows are always agreed in a proposal.</p></div><div className="package-grid">{packages.map((p,i)=><article className={`package-card ${i===1?'package-featured':''}`} key={p.name}><div className="package-top"><span className="package-label">{i===1?'A little more coverage':i===0?'A focused start':'Broader partnership'}</span><span className="package-spark">{i===1?<Sparkles size={14} aria-hidden="true"/>:null}</span></div><h3>{p.name}</h3><p className="package-audience">{p.audience}</p><p className="package-availability">Scope and fees shared by proposal</p><ul>{p.scope.map(s=><li key={s}><Check aria-hidden="true"/>{s}</li>)}</ul><p className="package-note">{p.note}</p><a className={i===1?'button button-dark':'button button-outline'} href="#contact">Ask about this option <ArrowUpRight size={15}/></a></article>)}</div></div></section>
 
+    <section className="section-shell reviews-home" id="reviews"><ReviewCarousel/></section>
+
     <section className="faq-section section-shell" id="faq" data-scene="faq" data-parallax-section="faq"><div className="faq-heading"><p className="kicker">A few useful details</p><h2>Questions, <em>answered.</em></h2><p>If your situation is specific, send a note and we can clarify it together.</p></div><div className="faq-list">{faqs.map(([q,a])=><details key={q} className="faq-item"><summary>{q}<span>+</span></summary><p>{a}</p></details>)}</div></section>
 
     <section className="contact-section" id="contact" data-scene="contact" data-editorial-reveal data-parallax-section="contact"><div className="section-shell contact-inner"><div className="contact-copy"><p className="kicker"><span className="kicker-line"/> Begin with a conversation</p><h2>What would you like<br/>to <em>make easier?</em></h2><p>Share the outcome you’re looking for. I’ll follow up to clarify timing, scope and next steps.</p><ContactDetails/><div className="contact-footnote"><ShieldCheck size={18}/><span>Please don’t include card details, passport numbers or sensitive documents here. A secure channel can be agreed if needed.</span></div></div><ContactForm services={services}/></div></section>
@@ -90,7 +92,7 @@ export default async function Home() {
       <BrandWordmark href="#home" className="footer-mark" />
       <p>Remote executive assistance and travel coordination.</p>
       <nav className="footer-links" aria-label="Footer">
-        <a href="/about">About</a><a href="/services">Services</a><a href="/travel">Travel desk</a><a href="/portfolio">Work</a><a href="/packages">Packages</a><a href="/how-it-works">Process</a><a href="/faq">FAQs</a><a href="/contact">Contact</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a>
+        <a href="/about">About</a><a href="/services">Services</a><a href="/travel">Travel desk</a><a href="/portfolio">Work</a><a href="/packages">Packages</a><a href="/reviews">Reviews</a><a href="/how-it-works">Process</a><a href="/faq">FAQs</a><a href="/contact">Contact</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a>
       </nav>
       <span className="copyright">© {new Date().getFullYear()} · Altura Executive</span>
     </footer>

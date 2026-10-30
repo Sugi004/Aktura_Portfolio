@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import { serviceVisuals } from '@/lib/service-visuals';
+import CopywritingSample from '@/components/CopywritingSample';
 
 export default function ServiceVisualPair({ serviceId }: { serviceId: string }) {
   const visual = serviceVisuals[serviceId];
@@ -30,5 +31,6 @@ export default function ServiceVisualPair({ serviceId }: { serviceId: string }) 
       <figcaption>{serviceId === 'executive' ? 'Priority inbox · clear calendar.' : visual.workflow}</figcaption>
     </figure>
     <p className="service-visual-disclaimer">Illustrative examples only; fictional mockups, not client work, activity or outcome claims.</p>
+    {serviceId === 'copywriting' && <CopywritingSample />}
   </div>;
 }

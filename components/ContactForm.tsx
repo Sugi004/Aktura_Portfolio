@@ -2,8 +2,9 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import type { FormEvent, ReactNode } from 'react';
-import { ArrowUpRight, Check, LoaderCircle } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 import type { Service } from '@/lib/content';
+import { createContactMailto } from '@/lib/contact-mailto';
 
 type Props = { services: Service[]; defaultService?: string };
 type TravelKind = 'flights' | 'accommodation' | 'travel' | 'reservations';
@@ -15,8 +16,7 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
 export default function ContactForm({ services, defaultService = '' }: Props) {
   const [selectedService, setSelectedService] = useState(defaultService);
   const [tripMode, setTripMode] = useState('return');
-  const [state, setState] = useState<'idle' | 'pending' | 'success' | 'error'>('idle');
-  const [message, setMessage] = useState('');
+  const [mailtoHref, setMailtoHref] = useState('');
   const service = useMemo(() => services.find(item => item.id === selectedService), [services, selectedService]);
   const requestKind = selectedService === 'flights' || /flight/i.test(service?.title ?? '') ? 'flight' : selectedService === 'accommodation' || /hotel|accommodation/i.test(service?.title ?? '') ? 'hotel' : selectedService === 'travel' || /complete travel|business travel/i.test(service?.title ?? '') ? 'complete-trip' : selectedService === 'reservations' || /reservation/i.test(service?.title ?? '') ? 'reservation' : undefined;
   const isTravelForm = Boolean(requestKind);
@@ -27,99 +27,32 @@ export default function ContactForm({ services, defaultService = '' }: Props) {
     else if (defaultService && services.some(item => item.id === defaultService)) setSelectedService(defaultService);
   }, [services, defaultService]);
 
-  async function submit(event: FormEvent<HTMLFormElement>) {
+  function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setState('pending');
-    setMessage('');
-    const form = event.currentTarget;
-    const data = new FormData(form);
-    const fields: Record<string, FormDataEntryValue> = {};
-    data.forEach((value, key) => { fields[key] = value; });
-    const text = (key: string) => typeof fields[`travel_${key}`] === 'string' ? String(fields[`travel_${key}`]).trim() : '';
-    const tripType = requestKind;
-    const travelDetails: Record<string, unknown> = {};
-    const number = (key: string) => {
-      const value = Number(fields[`travel_${key}`] || 0);
-      return Number.isInteger(value) && value > 0 ? value : undefined;
-    };
-    const list = (key: string) => text(key).split(',').map(item => item.trim()).filter(Boolean);
-    if (tripType) travelDetails.tripType = tripType;
-    if (requestKind === 'flight') {
-      if (text('origin')) travelDetails.origin = text('origin');
-      if (text('destination')) travelDetails.destination = text('destination');
-      if (text('departureDate')) travelDetails.departureDate = text('departureDate');
-      if (text('returnDate')) travelDetails.returnDate = text('returnDate');
-      if (text('tripMode')) travelDetails.tripMode = text('tripMode');
-      if (number('passengers')) travelDetails.passengers = number('passengers');
-      if (text('cabin')) travelDetails.cabin = text('cabin');
-    }
-    if (requestKind === 'hotel') {
-      travelDetails.destination = text('destination');
-      if (text('checkIn')) travelDetails.checkIn = text('checkIn');
-      if (text('checkOut')) travelDetails.checkOut = text('checkOut');
-      if (text('accommodationType')) travelDetails.accommodationType = text('accommodationType');
-      if (text('amenities')) travelDetails.preferences = text('amenities');
-      if (number('guests')) travelDetails.guests = number('guests');
-      if (number('rooms')) travelDetails.rooms = number('rooms');
-    }
-    if (requestKind === 'complete-trip') {
-      if (text('origin')) travelDetails.origin = text('origin');
-      const destinations = list('destinations');
-      if (destinations.length) travelDetails.destinations = destinations;
-      if (text('departureDate')) travelDetails.departureDate = text('departureDate');
-      if (text('returnDate')) travelDetails.returnDate = text('returnDate');
-      if (number('passengers')) travelDetails.travelers = number('passengers');
-      const components = ['flights', 'accommodation', 'transfers', 'car-rental', 'restaurants', 'meetings-events', 'additional-concierge']
-        .filter((key) => fields[`travel_component_${key}`] === 'on');
-      if (components.length) travelDetails.components = components;
-      if (text('additional')) travelDetails.preferences = text('additional');
-    }
-    if (requestKind === 'reservation') {
-      if (text('location')) travelDetails.location = text('location');
-      if (text('occasion')) travelDetails.occasion = text('occasion');
-      if (text('date')) travelDetails.date = text('date');
-      if (text('time')) travelDetails.time = text('time');
-      if (number('partySize')) travelDetails.partySize = number('partySize');
-      if (text('preference')) travelDetails.preference = text('preference');
-    }
-    if (text('requirements')) travelDetails.requirements = text('requirements');
-    const category = service?.group === 'Executive support' ? 'executive-support' : service?.group === 'Travel desk' ? 'travel' : service?.group === 'Business operations' ? 'business-operations' : service?.group === 'Digital support' ? 'digital-workflows' : service?.group === 'Health & wellness coordination' ? 'health-wellness' : 'other';
-    const payload: Record<string, unknown> = {
-      name: fields.name,
-      email: fields.email,
-      timezone: [String(fields.country ?? '').trim(), String(fields.timezone ?? '').trim()].filter(Boolean).join(' · '),
-      service: selectedService,
-      serviceSelections: data.getAll('additionalServices').map(String),
-      serviceCategory: category,
-      serviceSlug: selectedService,
-      budget: [String(fields.budget ?? '').trim(), String(fields.currency ?? '').trim()].filter(Boolean).join(' '),
-      contactMethod: fields.contactMethod,
-      message: fields.message,
-      consent: fields.consent === 'on',
-      website: fields.website,
-      ...(tripType ? { travelDetails } : {}),
-    };
-    try {
-      const response = await fetch('/api/inquiries', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
+    const data = new FormData(event.currentTarget);
+    const serviceTitle = services.find((item) => item.id === String(data.get('service'))) ?.title ?? 'General inquiry';
+    const displayLabel = (key: string) => key
+      .replace(/^travel_component_/, 'trip component ')
+      .replace(/^travel_/, '')
+      .replace(/([A-Z])/g, ' $1')
+      .replaceAll('_', ' ')
+      .replace(/^./, (value) => value.toUpperCase());
+    const lines = Array.from(data.entries())
+      .filter(([key, value]) => key === 'service' ? false : key.startsWith('travel_component_') ? value === 'on' : String(value).trim().length > 0)
+      .map(([key, value]) => {
+        if (key === 'additionalServices') {
+          const title = services.find((item) => item.id === String(value))?.title ?? String(value);
+          return `Additional service: ${title}`;
+        }
+        if (key.startsWith('travel_component_')) return `Trip component: ${displayLabel(key).replace('Trip component ', '')}`;
+        return `${displayLabel(key)}: ${String(value).trim()}`;
       });
-      const result = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(result.error || 'Your request could not be sent. Please review the details and try again.');
-      setState('success');
-      setMessage(result.notificationSent === false
-        ? `Your request was saved, but the business email alert was not sent. Keep this reference: ${result.id ?? 'saved request'}. A reply may be delayed. No reservation is confirmed by this request.`
-        : 'Your request has been received. I’ll review the details and follow up about scope and next steps. No reservation is confirmed by this request.');
-      form.reset();
-      setSelectedService('');
-    } catch (error) {
-      setState('error');
-      setMessage(error instanceof Error ? error.message : 'Your request could not be sent. Please try again.');
-    }
+    const subject = `Altura Executive inquiry — ${serviceTitle}`;
+    const body = `Hello Altura Executive,\n\nI would like to discuss support with the following details:\n\n${lines.join('\n')}\n\nPlease let me know the next steps.\n`;
+    setMailtoHref(createContactMailto('alturaexecutive@gmail.com', subject, body));
   }
 
   return <form className="contact-form" onSubmit={submit}>
-    {state === 'success' && <div className="form-alert success-alert" role="status"><Check size={17}/><span>{message}</span></div>}
-    {state === 'error' && <div className="form-alert error-alert" role="alert">{message}</div>}
     <div className="form-row">
       <Field label="Your name"><input name="name" autoComplete="name" required placeholder="Name"/></Field>
       <Field label="Business email"><input name="email" type="email" autoComplete="email" required placeholder="you@company.com"/></Field>
@@ -165,8 +98,8 @@ export default function ContactForm({ services, defaultService = '' }: Props) {
       <Field label="Travel budget and other requirements"><input name="travel_requirements" placeholder="Amount and currency, flexibility, room needs or preferences"/></Field>
     </fieldset>}
     <Field label="Project description"><textarea name="message" rows={4} required placeholder="A few details about your request, deadline and preferences…"/></Field>
-    <label className="consent-field"><input name="consent" type="checkbox" required/> I agree that these details may be used to respond to my inquiry. <a href="/privacy">Privacy notice</a>.</label>
-    <div className="form-submit"><button className="button button-dark" type="submit" disabled={state === 'pending'}>{state === 'pending' ? <>Sending <LoaderCircle className="spin" size={15}/></> : <>Send an inquiry <ArrowUpRight size={16}/></>}</button><span>Submitting a request does not authorize a booking.</span></div>
-    <div className="honeypot" aria-hidden="true"><label>Leave this field empty<input name="website" tabIndex={-1} autoComplete="off"/></label></div>
+    <p className="contact-form-privacy">Your details stay in this form until you choose to open your email app. The website does not store or send them. Please don’t include card or passport details.</p>
+    <div className="form-submit"><button className="button button-dark" type="submit">Prepare email <ArrowUpRight size={16}/></button><span>This website does not store your request.</span></div>
+    {mailtoHref && <div className="form-alert success-alert" role="status"><span>Your email draft is ready. It won’t be sent until you choose Send in your email app.</span><a className="button button-outline" href={mailtoHref}>Open email app <ArrowUpRight size={15}/></a></div>}
   </form>;
 }

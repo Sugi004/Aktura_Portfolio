@@ -5,5 +5,10 @@ out/
 !.env.example
 .vercel
 .DS_Store
-
+test-results/
+playwright-report/
+tests
+tests/**/*.ts
 *.tsbuildinfo
+playwright.config.ts
+.next-stale-runtime
