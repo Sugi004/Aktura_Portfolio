@@ -48,7 +48,7 @@ export default function ContactForm({ services, defaultService = '' }: Props) {
         return `${displayLabel(key)}: ${String(value).trim()}`;
       });
     const subject = `Altura Executive inquiry — ${serviceTitle}`;
-    const body = `Hello Altura Executive,\n\nI would like to discuss support with the following details:\n\n${lines.join('\n\n')}\n\nPlease let me know the next steps.\n`;
+    const body = `Hello Altura Executive,\n\nI would like to discuss support with the following details:\n\n${lines.join('\n')}\n\nPlease let me know the next steps.\n`;
     setMailtoHref(createContactMailto('alturaexecutive@gmail.com', subject, body));
   }
 
@@ -63,7 +63,7 @@ export default function ContactForm({ services, defaultService = '' }: Props) {
     </div>
     <div className="form-row">
       <Field label="What can I help with?"><select name="service" value={selectedService} onChange={e=>setSelectedService(e.target.value)} required><option value="" disabled>Select a service</option>{services.map(s=><option value={s.id} key={s.id}>{s.title}</option>)}</select></Field>
-      <Field label="Preferred contact"><select name="contactMethod" defaultValue="email"><option value="email">Email</option><option value="video">Video call</option><option value="phone">Phone</option><option value="whatsapp">WhatsApp (share number in message)</option></select></Field>
+      <Field label="Preferred contact"><select name="contactMethod" defaultValue="Email"><option value="Email">Email</option><option value="Video call">Video call</option><option value="Phone">Phone</option><option value="WhatsApp: [Replace with your number]">WhatsApp (share number in message)</option></select></Field>
     </div>
     <details className="additional-services"><summary>Add more services to this request</summary><div>{services.filter(item=>item.id!==selectedService).map(item=><label key={item.id}><input type="checkbox" name="additionalServices" value={item.id}/>{item.title}</label>)}</div></details>
     <div className="form-row">
