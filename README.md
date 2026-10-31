@@ -29,3 +29,4 @@ Playwright browser tests cover public navigation, carousel controls, email draft
 Import the repository into Vercel and deploy. Set `NEXT_PUBLIC_SITE_URL` to the canonical HTTPS domain for sitemap and robots metadata. No database or admin credentials are required.
 
 Before launch, replace remaining sample business details, review the privacy and terms copy, confirm the contact email and phone number, and make sure the testimonials and ratings are approved for publication.
+# Altura_portfolio
